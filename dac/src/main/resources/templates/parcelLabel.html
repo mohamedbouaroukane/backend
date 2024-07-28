@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Parcel Label</title>
+</head>
+<body>
+<h1>Parcel Label</h1>
+<p>Parcel ID: <span th:text="${parcelId}"></span></p>
+<img th:src="${qrCodeUrl}" alt="QR Code"/>
+</body>
+</html>

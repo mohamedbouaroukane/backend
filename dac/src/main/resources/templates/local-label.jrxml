@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="newLabel" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96aeb8eb-2ae2-40bc-bda0-3c6c88bc8b5d">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="qrcode" class="java.io.InputStream"/>
+	<parameter name="barcode" class="java.io.InputStream"/>
+	<parameter name="date" class="java.lang.String"/>
+	<parameter name="senderName" class="java.lang.String"/>
+	<parameter name="senderEmail" class="java.lang.String"/>
+	<parameter name="senderPhone" class="java.lang.String"/>
+	<parameter name="receiverName" class="java.lang.String"/>
+	<parameter name="receiverEmail" class="java.lang.String"/>
+	<parameter name="receiverPhone" class="java.lang.String"/>
+	<parameter name="traceCode" class="java.lang.String"/>
+	<parameter name="lockerNumber" class="java.lang.String"/>
+	<parameter name="parcelDetail" class="java.lang.String"/>
+	<parameter name="parcelPrice" class="java.lang.String"/>
+	<parameter name="parcelDescription" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="112" splitType="Stretch">
+			<image>
+				<reportElement x="469" y="-10" width="107" height="113" uuid="242965b7-a151-4410-873f-7fe6dcb1d736"/>
+				<imageExpression><![CDATA["C:/Users/user/Desktop/Parcel Locker/dac-20240528T181901Z-001/dac/src/main/resources/assets/images/parcel-label-logo.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="4" y="1" width="236" height="30" uuid="79fbee90-e40e-42a9-b433-1344eb788a1b"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="14"/>
+				</textElement>
+				<text><![CDATA[Swift Box Parcel Locker Service]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4" y="22" width="236" height="30" uuid="1b7b23c9-0411-4511-8887-ae21c0d66e7b"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="14"/>
+				</textElement>
+				<text><![CDATA[Contacts@swiftbox.dz/033658819]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="4" y="50" width="236" height="44" uuid="7110b405-6f2d-4bec-a951-fa20cdbe06d3">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="14" y="51" width="226" height="26" uuid="53c2d82c-b847-48ea-b7f3-a2db838e5178"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="Gilroy-Bold" size="19"/>
+				</textElement>
+				<text><![CDATA[Biskra]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="10" y="79" width="224" height="19" uuid="c8860146-6e08-4a8f-8427-902fd6897e74"/>
+				<textElement textAlignment="Right">
+					<font fontName="Gilroy-SemiBold" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="113" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="90" height="90" backcolor="#3160AD" uuid="e10298e8-df2b-46b4-a49c-b2254446ce5f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<image>
+				<reportElement x="110" y="30" width="444" height="60" uuid="09e145e8-f3d7-43a4-8675-8d21b01ce570"/>
+				<imageExpression><![CDATA[$P{barcode}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="110" y="0" width="446" height="33" uuid="abc26639-fb1f-460f-a71b-a31cbe1a122e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Arial Black" size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{traceCode}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="90" height="89" forecolor="#FFFFFF" uuid="59d472af-9a26-4968-bf72-fc5e2f35f6c4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Gilroy-Bold" size="47"/>
+				</textElement>
+				<text><![CDATA[L]]></text>
+			</staticText>
+		</band>
+		<band height="347">
+			<rectangle>
+				<reportElement mode="Transparent" x="-1" y="0" width="555" height="330" uuid="6529d9d2-496c-4176-9d36-189e5cd39b07"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="270" y="0" width="1" height="150" uuid="89916e85-7dd5-422b-8506-18e778b8e17b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="0" y="150" width="555" height="1" uuid="a653c15a-c5a9-493a-bbf8-2bd973c97a56">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="-1" y="230" width="555" height="1" uuid="9978c06b-987a-407e-ab2f-fad83f4a92ce">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="20" y="13" width="119" height="35" forecolor="#050505" uuid="a747a353-a918-43a0-827f-11e179d4c4c6"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sender]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="30" y="54" width="230" height="18" uuid="f51b13e3-ba32-4c72-a287-5d7a27672c35">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="30" y="113" width="230" height="18" uuid="f6411ff6-79ad-4d2b-943c-802611f5d725">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderPhone}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="30" y="83" width="230" height="19" uuid="c8785a9e-4eac-4cb5-aa5a-421f3b163140">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderEmail}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="55" width="230" height="18" uuid="f96b9b2d-573a-4668-94a5-ac16b2abef8c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{receiverName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="114" width="230" height="18" uuid="54f37739-2df1-4916-9136-fa49d9ea3951">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{receiverPhone}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="84" width="230" height="19" uuid="ada65e20-bb65-481e-8d2c-65fe9dfd9edf">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{receiverEmail}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="290" y="14" width="119" height="35" forecolor="#050505" uuid="b10fc7ed-e08e-41bf-844f-98ea95091464"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Receiver]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="20" y="160" width="189" height="35" forecolor="#050505" uuid="4a3020df-3729-4890-b212-72aa6014356a"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Parcel Detail ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="200" width="230" height="18" uuid="3f079077-d0de-4931-a1ac-a1a2ba2cc314">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{parcelDetail}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="300" y="160" width="189" height="35" forecolor="#050505" uuid="2fc563dd-2d26-4192-8921-4b8a4b15f501"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Parcel Price]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="300" y="200" width="230" height="18" uuid="d282fbf6-41aa-457b-b8c0-69582d3270d2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{parcelPrice}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="240" width="189" height="35" forecolor="#050505" uuid="febf8e6d-a3c1-4a73-8218-a667e89c0544"/>
+				<textElement textAlignment="Left">
+					<font fontName="Gilroy-Bold" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Parcel Description]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="275" width="510" height="44" uuid="25c959cd-b913-420b-85fc-ed915b03d0bb">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="Gilroy-SemiBold" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{parcelDescription}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="162" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Opaque" x="0" y="10" width="110" height="30" backcolor="#3160AD" uuid="669a3392-db6a-4521-87d8-14f35ddc545d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineColor="#3160AD"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="40" width="110" height="110" uuid="b544087b-722f-4c90-a68e-065dd65a440b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineColor="#3160AD"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="10" width="110" height="30" forecolor="#FFFFFF" uuid="604a52a6-03ab-4434-9d20-15d32c49541c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Gilroy-Bold" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Locker QR Code]]></text>
+			</staticText>
+			<image>
+				<reportElement x="5" y="45" width="100" height="101" uuid="e254ec22-6bfe-4db0-bb2d-03ea42b42f63"/>
+				<imageExpression><![CDATA[$P{qrcode}]]></imageExpression>
+			</image>
+		</band>
+	</summary>
+</jasperReport>
