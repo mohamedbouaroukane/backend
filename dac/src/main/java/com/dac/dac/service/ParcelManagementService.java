@@ -8,14 +8,16 @@ import com.dac.dac.exption.EmptyListRecordException;
 import com.dac.dac.exption.ParcelDropException;
 import com.dac.dac.exption.RecordNotFoundException;
 import com.dac.dac.mapper.ParcelMapper;
-import com.dac.dac.payload.response.ParcelLockerResponseDto;
+import com.dac.dac.payload.response.ParcelLockerPinResponseDto;
 import com.dac.dac.repository.*;
 import jakarta.transaction.Transactional;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -48,9 +50,9 @@ public class ParcelManagementService {
 
     @Autowired
     private ParcelMapper parcelMapper;
+    Logger logger = LoggerFactory.getLogger("mohamed");
 
-    public ParcelLockerResponseDto dropParcel(int parcelLockerId, String parcelCode) {
-        Logger logger = LoggerFactory.getLogger("mohamed");
+    public ParcelLockerPinResponseDto dropParcel(int parcelLockerId, String parcelCode) {
         logger.info(parcelCode);
         Parcel parcel = parcelRepository.findByLockerCode(parcelCode).orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"parcel","locker code",parcelCode)));
         ParcelLocker parcelLocker = parcelLockerRepository.findById(parcelLockerId).orElseThrow(()-> new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"Parcel locker","id",parcelLockerId)));
@@ -78,14 +80,14 @@ public class ParcelManagementService {
 
                 parcelStatusService.logParcelStatus(parcel,status);
 
-                return ParcelLockerResponseDto.builder().pin(locker.getPin()).build();
+                return ParcelLockerPinResponseDto.builder().pin(locker.getPin()).build();
             }
         }
         throw new ParcelDropException("Cannot drop Parcel");
     }
 
 
-    public ParcelLockerResponseDto pickupParcel(int parcelLockerId,Long pickupCode){
+    public ParcelLockerPinResponseDto pickupParcel(int parcelLockerId, Long pickupCode){
         Parcel parcel = parcelRepository.findByPickupCode(pickupCode).orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"parcel","pickup number",pickupCode)));
         ParcelLocker parcelLocker = parcelLockerRepository.findById(parcelLockerId).orElseThrow(()-> new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"Parcel locker","id",parcelLockerId)));
         if(parcel.getReceiverParcelLocker().getId() == parcelLocker.getId() && parcel.getStatus().getStatusLabel().equals(ParcelStatusConst.RECEIVER_LOCKER) ){
@@ -93,7 +95,7 @@ public class ParcelManagementService {
             parcel.getReceiverLocker().setStatus(LockerStatus.AVAILABLE);
             parcel.getReceiverLocker().setCurrentParcel(null);
             parcel.setStatus(status);
-            return ParcelLockerResponseDto.builder().pin(parcel.getReceiverLocker().getPin()).build();
+            return ParcelLockerPinResponseDto.builder().pin(parcel.getReceiverLocker().getPin()).build();
         }
 
         return null;
@@ -101,7 +103,7 @@ public class ParcelManagementService {
 
 
     public byte[] entryParcelToRSC(int userId,List<String> traceCodes) {
-        List<Parcel> parcels = parcelRepository.findAllByTrackingCodeIn(traceCodes);
+        List<Parcel> parcels = parcelRepository.findAllByTrackingCodeInAndStatusStatusLabelOrStatusStatusLabel(traceCodes,ParcelStatusConst.SENDER_COURIER, ParcelStatusConst.PAYDED);
         Status status = statusRepository.findByStatusLabel(ParcelStatusConst.CTR_HUB)
                 .orElseThrow(() -> new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION, "status", "label", ParcelStatusConst.CTR_HUB)));
         if(parcels.isEmpty()){
@@ -110,14 +112,12 @@ public class ParcelManagementService {
         User user = userRepository.findById(userId).orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"user","id",userId)));
 
         for (Parcel parcel : parcels) {
-            if(parcel.getStatus().getStatusLabel().equals(ParcelStatusConst.SENDER_COURIER)){
                 parcel.setStatus(status);
                 parcelStatusService.logParcelStatus(parcel, status);
-            }
 
         }
-
-        return generatePDFService.generateManifest(parcelMapper.mapToManifestModel(parcels),user,"Regional Sorting Center",parcels.get(0).getReceiverParcelLocker().getAddress().toString(),"Entry Parcel To CTR");
+        LocalParcel localParcel  = (LocalParcel) parcels.get(0);
+        return generatePDFService.generateManifest(parcelMapper.mapToManifestModel(parcels),user,localParcel.getSenderLocker().getParcelLocker().getAddress().getCity()+"("+ localParcel.getSenderLocker().getParcelLocker().getAddress().getZipCode()+ ")","Regional Sorting Center","Entry Parcel To CTR");
 
     }
 
@@ -133,9 +133,27 @@ public class ParcelManagementService {
             }
 
         }
-        return generatePDFService.generateManifest(parcelMapper.mapToManifestModel(parcels),user,"Regional Sorting Center",parcels.get(0).getReceiverParcelLocker().getAddress().toString(),"Send Parcels to parcel Locker");
+        return generatePDFService.generateManifest(parcelMapper.mapToManifestModel(parcels),user,"Regional Sorting Center",parcels.get(0).getReceiverParcelLocker().getAddress().getCity()+"("+ parcels.get(0).getReceiverParcelLocker().getAddress().getZipCode()+ ")","Exit Parcels from CTR");
 
     }
 
+
+    public void payedTaxParcel(int clientId,int parcelId){
+        Parcel parcel = parcelRepository.findById(parcelId).orElse(null);
+        Status statusReturn = statusRepository.findByStatusLabel(ParcelStatusConst.RETURNED).orElseThrow(() -> new RecordNotFoundException("status don't found"));
+
+        Status statusPayed = statusRepository.findByStatusLabel(ParcelStatusConst.PAYDED).orElseThrow(() -> new RecordNotFoundException("status don't found"));
+                    if(parcel instanceof LocalParcel localParcel){
+                        if(localParcel.getStatus().getStatusLabel().equals(ParcelStatusConst.OVER_WEIGHT) && localParcel.getSender().getId() == clientId){
+                           if(LocalDateTime.now().isBefore(localParcel.getTaxFilingDate().plusDays(3))){
+                               parcel.setStatus(statusPayed);
+                               parcelStatusService.logParcelStatus(parcel, statusPayed);
+                           }else{
+                               parcel.setStatus(statusReturn);
+                               parcelStatusService.logParcelStatus(parcel, statusReturn);
+                           }
+                        }
+                    }
+        }
 
 }

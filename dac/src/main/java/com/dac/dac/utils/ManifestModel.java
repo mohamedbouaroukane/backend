@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ManifestModel {
-    String traceCode;
+    String trackingCode;
     double weight;
 }

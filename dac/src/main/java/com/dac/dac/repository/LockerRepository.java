@@ -23,7 +23,7 @@ public interface LockerRepository extends JpaRepository<Locker,Integer> {
     @Query("SELECT COUNT(l) FROM Locker l WHERE l.status = :status AND l.parcelLocker.id = :parcelLockerId")
     long countByStatusAndParcelLockerId(@Param("status") LockerStatus status, @Param("parcelLockerId") int parcelLockerId);
 
-    @Query("SELECT COUNT(l) FROM Locker l WHERE l.currentParcel.status.statusLabel = :status AND l.parcelLocker.id = :parcelLockerId")
+    @Query("SELECT COUNT(l) FROM Locker l WHERE l.currentParcel.status.statusLabel = :status AND l.parcelLocker.id = :parcelLockerId AND l.currentParcel.isPrinted = false")
     long countByParcelStatusAndParcelLockerId(@Param("status") ParcelStatusConst status, @Param("parcelLockerId") int parcelLockerId);
 
     @Query("SELECT COUNT(l) FROM Locker l WHERE l.currentParcel.isPrinted = :isPrinted AND l.parcelLocker.id = :parcelLockerId")
@@ -40,6 +40,9 @@ public interface LockerRepository extends JpaRepository<Locker,Integer> {
     @Query("SELECT l FROM Locker l WHERE l.status = :status AND l.parcelLocker.id = :parcelLockerId AND l.currentParcel.status.statusLabel = :parcelStatus AND l.currentParcel.receiverDate < current_timestamp()")
     List<Locker> findAllByExpiredDate(@Param("status") LockerStatus status, @Param("parcelLockerId") int parcelLockerId, @Param("parcelStatus") ParcelStatusConst parcelStatus);
 
+
+    @Query("SELECT l.currentParcel FROM Locker l WHERE l.status = :status AND l.currentParcel IS NOT NULL AND l.parcelLocker.id = :parcelLockerID")
+    List<Parcel> findAllParcelsByStatusAndCurrentParcelNotNull(@Param("status") LockerStatus status,@Param("parcelLockerID") int parcelLockerID);
 
 
 }

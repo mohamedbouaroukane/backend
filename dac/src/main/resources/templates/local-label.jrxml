@@ -228,7 +228,7 @@
 				</textElement>
 				<text><![CDATA[Parcel Description]]></text>
 			</staticText>
-			<textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="20" y="275" width="510" height="44" uuid="25c959cd-b913-420b-85fc-ed915b03d0bb">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>

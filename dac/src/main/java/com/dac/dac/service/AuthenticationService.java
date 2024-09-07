@@ -53,11 +53,11 @@ public class AuthenticationService {
     @Transactional
     public Boolean register(RegisterRequestDto registerRequestDto) {
             verifyMailPhone(registerRequestDto.getEmail(),registerRequestDto.getPhone());
-            User user;
+            User user ;
+
 
             if(UserRoleValue.CLIENT.equalsIgnoreCase(registerRequestDto.getUserRole())){
                 user = userMapper.mapToClient(registerRequestDto);
-                log.info(String.valueOf(user.getEnabled()));
                 user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
                 userRepository.save(user);
                 String token = emailConfirmationService.createToken(user.getId());

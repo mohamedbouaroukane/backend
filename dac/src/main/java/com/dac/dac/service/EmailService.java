@@ -80,6 +80,13 @@ public class EmailService {
     public void sendParcelLabelAttachmentsEmail(String to, String client, byte[] content){
         sendAttachmentsEmail(to,content,generateParcelLabelBodyMail(client));
     }
+    public void sendManifestToCourier(String to,byte[] content,String body){
+        sendAttachmentsEmail(to,content,"");
+
+    }
+
+
+
     public void sendMailConfirmation(String to,String client, String link){
             sendSimpleEmail(to,"Confirm your email",generateMailConfirmationBody(client,link));
     }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,11 @@ public class LocalParcel extends Parcel{
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private Client sender;
+
+
+    private Double taxAmount;
+
+    private LocalDateTime taxFilingDate;
 
 
 

@@ -15,11 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class Address {
     @Id
     private int zipCode;
-    private String postName;
-    private String postAddress;
-    private String communeName;
-    private String dairaName;
-    private String stateName;
+    private String street;
+    private String city;
     private Double latitude;
     private Double longitude;
 

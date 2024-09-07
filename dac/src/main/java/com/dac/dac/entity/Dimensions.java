@@ -15,5 +15,6 @@ public class Dimensions {
     private DimensionsKey id;
     private Double width;
     private Double height;
+    private Double depth;
     private Double weight;
 }

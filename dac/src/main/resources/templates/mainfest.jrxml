@@ -37,7 +37,7 @@
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
-		<field name="traceCode" class="java.lang.String"/>
+		<field name="trackingCode" class="java.lang.String"/>
 		<field name="weight" class="java.lang.Double"/>
 	</subDataset>
 	<parameter name="manifestType" class="java.lang.String"/>
@@ -130,7 +130,7 @@
 						<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 					</reportElement>
 					<textElement verticalAlignment="Top">
-						<font fontName="Gilroy-Medium" size="19"/>
+						<font fontName="DejaVu Sans" size="19"/>
 						<paragraph leftIndent="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$P{from}]]></textFieldExpression>
@@ -140,7 +140,7 @@
 						<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 					</reportElement>
 					<textElement verticalAlignment="Top">
-						<font fontName="Gilroy-Medium" size="19"/>
+						<font fontName="DejaVu Sans" size="19"/>
 						<paragraph leftIndent="10"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$P{to}]]></textFieldExpression>
@@ -229,7 +229,7 @@
 									<font fontName="Gilroy-Medium"/>
 									<paragraph leftIndent="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{traceCode}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{trackingCode}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

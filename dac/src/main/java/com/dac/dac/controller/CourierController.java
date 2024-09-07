@@ -7,6 +7,8 @@ import com.dac.dac.payload.response.ParcelLockerStaticsCourierResponseDto;
 import com.dac.dac.service.CourierParcelLockerService;
 import com.dac.dac.service.CourierService;
 import com.dac.dac.service.GeneratePDFService;
+import com.dac.dac.service.ParcelService;
+import com.dac.dac.utils.CustomDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -29,6 +32,9 @@ public class CourierController {
 
     @Autowired
     private CourierParcelLockerService courierParcelLockerService;
+    @Autowired
+    private ParcelService parcelService;
+
 
     @GetMapping("/")
     private List<CourierDto> getAllCourier(){
@@ -80,6 +86,8 @@ public class CourierController {
 
     @Autowired
     private GeneratePDFService generatePDFService;
+
+    @CrossOrigin("**")
     @GetMapping("{id}/parcel-locker/{parcelLockerId}/parcel-label")
     public ResponseEntity getPdf(@PathVariable int id,@PathVariable int parcelLockerId) throws Exception {
         byte[] pdfBytes = courierParcelLockerService.generateAllParcelLabel(id,parcelLockerId);
@@ -97,5 +105,40 @@ public class CourierController {
        parcelLockerStaticsCourierResponseDtos.sort(Comparator.comparingDouble(ParcelLockerStaticsCourierResponseDto::getParcelPrintedNumber).reversed());
         return  new ResponseEntity( parcelLockerStaticsCourierResponseDtos, HttpStatus.OK);
     }
+    @GetMapping("/{id}/account")
+    public ResponseEntity getAccount(@PathVariable Integer id) throws Exception {
+        return new ResponseEntity(courierService.getCourierAccountById(id),HttpStatus.OK);
+    }
 
+    @GetMapping("/access/statics")
+    public ResponseEntity getCourierAccessStatics() throws Exception {
+        return new ResponseEntity(courierParcelLockerService.getCourierAccessHistory(),HttpStatus.OK);
+    }
+
+    @GetMapping("/access/")
+    public ResponseEntity getCourierAccessList() throws Exception {
+        return new ResponseEntity(courierParcelLockerService.getAllCourierAccess(),HttpStatus.OK);
+    }
+    @GetMapping("/reports/")
+    public ResponseEntity sendReports() throws Exception {
+        byte[] pdfBytes = courierParcelLockerService.sendReports();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sample.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdfBytes.length)
+                .body(new InputStreamResource(new ByteArrayInputStream(pdfBytes)));
+    }
+    @GetMapping("/{id}/parcel/payded")
+    public ResponseEntity getAllParcelStatusStatics(@PathVariable Integer id) throws Exception {
+        return new ResponseEntity(parcelService.getAllCourierPayedParcels(id),HttpStatus.OK);
+    }
+    @GetMapping("/access/{id}")
+    public ResponseEntity<InputStreamResource> getCourierAccessById(@PathVariable int id){
+        byte[] pdfBytes = courierParcelLockerService.getCourierAccessById(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=access manifest"+ id +".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdfBytes.length)
+                .body(new InputStreamResource(new ByteArrayInputStream(pdfBytes)));
+    }
 }

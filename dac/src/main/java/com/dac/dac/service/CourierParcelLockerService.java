@@ -7,11 +7,9 @@ import com.dac.dac.exption.RecordNotFoundException;
 import com.dac.dac.exption.TokenException;
 import com.dac.dac.mapper.CourierParcelLockerMapper;
 import com.dac.dac.mapper.LockerMapper;
+import com.dac.dac.mapper.ParcelMapper;
 import com.dac.dac.payload.CourierParcelLockerDto;
-import com.dac.dac.payload.response.CourierParcelLockerResponseDto;
-import com.dac.dac.payload.response.ParcelLockerResponseDto;
-import com.dac.dac.payload.response.ParcelLockerStaticsCourierResponseDto;
-import com.dac.dac.payload.response.ParcelLockerStaticsResponseDto;
+import com.dac.dac.payload.response.*;
 import com.dac.dac.repository.*;
 import com.dac.dac.utils.CourierParcelLockerCheckerModel;
 import com.dac.dac.utils.StreamUtil;
@@ -21,10 +19,12 @@ import jakarta.transaction.Transactional;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -39,8 +39,6 @@ public class CourierParcelLockerService {
     @Autowired
     private ParcelLockerRepository parcelLockerRepository;
 
-    @Autowired
-    private GenerateCodeService generateCodeService;
 
     @Autowired
     private GenerateBarCodeService generateBarCodeService;
@@ -52,6 +50,7 @@ public class CourierParcelLockerService {
 
     @Autowired
     private LockerMapper lockerMapper;
+
 
     @Autowired
     @Qualifier("courierEncryptionService")
@@ -69,10 +68,16 @@ public class CourierParcelLockerService {
     private GeneratePDFService generatePDFService;
     @Autowired
     private ParcelRepository parcelRepository;
+    @Autowired
+    private ParcelMapper parcelMapper;
 
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private LocalParcelRepository localParcelRepository;
 
+    @Autowired
+    private UserRepository userRepository;
     public CourierParcelLockerDto generateCourierParcelLocker(int courierId, int parcelLockerId) throws IOException, WriterException {
         ParcelLocker parcelLocker = parcelLockerRepository.findById(parcelLockerId).orElse(null);
         Courier courier = courierRepository.findById(courierId).orElse(null);
@@ -99,48 +104,83 @@ public class CourierParcelLockerService {
         courierParcelLockerRepository.save(courierParcelLocker);
         return CourierParcelLockerDto.builder().code(qrCode).build();
     }
+    public List<CourierParcelLockerResponseDto> getAllCourierAccess() {
+        List<CourierParcelLocker> courierParcelLocker = courierParcelLockerRepository.findAll();
+        List<CourierParcelLockerResponseDto> courierParcelLockerResponseDtos = courierParcelLockerMapper.mapToListResponseDto(courierParcelLocker);
+        return courierParcelLockerResponseDtos;
+    }
 
     @Transactional
-    public List<ParcelLockerResponseDto> courierAccess(int parcelLockerId, String code)  {
+    public CourierParcelLockerPinsResponseDto courierAccess(int parcelLockerId, String code)  {
 
         ObjectMapper objectMapper = new ObjectMapper();
+
 
         try {
             CourierParcelLocker courierParcelLocker = courierParcelLockerRepository.findByAccessCode(code).orElse(null);
             String decryptedCode = encryptionService.decrypt(code);
             CourierParcelLockerCheckerModel courierParcelLockerChecker = objectMapper.readValue(decryptedCode, CourierParcelLockerCheckerModel.class);
+
             if(isValid(courierParcelLockerChecker,parcelLockerId)){
-                List<Locker> lockers = lockerRepository.findAllByStatusAndParcelLockerIdAndParcelStatus(LockerStatus.NOT_AVAILABLE,parcelLockerId, ParcelStatusConst.SENDER_LOCKER);
-                Status status = statusRepository.findByStatusLabel(ParcelStatusConst.SENDER_COURIER)
+                Status sendingStatus = statusRepository.findByStatusLabel(ParcelStatusConst.SENDER_COURIER)
                         .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"status","label",ParcelStatusConst.SENDER_COURIER)));
-                for(Locker locker : lockers){
-                    locker.getCurrentParcel().setStatus(status);
-                    locker.setStatus(LockerStatus.AVAILABLE);
-                    parcelStatusRepository.save(ParcelStatus.builder()
-                            .parcel(locker.getCurrentParcel())
-                            .status(status)
-                            .date(new Date())
-                            .build());
-                    locker.setCurrentParcel(null);
-                }
+                Status returendStatus = statusRepository.findByStatusLabel(ParcelStatusConst.RETURNED)
+                        .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"status","label",ParcelStatusConst.SENDER_COURIER)));
+
+                List<Locker> expiredLockers = lockerRepository.findAllByExpiredDate(LockerStatus.NOT_AVAILABLE,parcelLockerId,ParcelStatusConst.RECEIVER_LOCKER);
+                List<Locker> sendingLockers = lockerRepository.findAllByStatusAndParcelLockerIdAndParcelStatus(LockerStatus.NOT_AVAILABLE,parcelLockerId, ParcelStatusConst.SENDER_LOCKER);
+
+                List<Parcel> parcels = lockerRepository.findAllParcelsByStatusAndCurrentParcelNotNull(LockerStatus.NOT_AVAILABLE,parcelLockerId);
+
+                updateCollectedParcels(sendingLockers,sendingStatus);
+                updateCollectedParcels(expiredLockers,returendStatus);
+
+                User user = userRepository.findById(courierParcelLockerChecker.getCourierId()).orElse(null);
+                ParcelLocker parcelLocker = parcelLockerRepository.findById(parcelLockerId).orElseThrow(()->new RecordNotFoundException("parcel locker not found"));
+                String from = parcelLocker.getAddress().getStreet()+"("+ parcelLocker.getAddress().getZipCode()+ ")";
+                byte[] manifest = generatePDFService.generateManifest(parcelMapper.mapToManifestModel(parcels),user,from,"Regional Sorting Center","Collect parcels from parcel lockers");
+
+                List<ParcelLockerPinResponseDto> sending = lockerMapper.mapToParcelLockerResponseDto(sendingLockers);
+                List<ParcelLockerPinResponseDto> expired =  lockerMapper.mapToParcelLockerResponseDto(expiredLockers);
+
                 assert courierParcelLocker != null;
                 courierParcelLocker.setUsed(true);
                 courierParcelLocker.setAccessDate(new Date());
-                return lockerMapper.mapToParcelLockerResponseDto(lockers);
+                assert user != null;
+                emailService.sendManifestToCourier(user.getEmail(),manifest,"");
+                courierParcelLocker.setManifest(manifest);
+                return new CourierParcelLockerPinsResponseDto(sending,expired);
             }else{
                 throw new TokenException("Token expired");
             }
         } catch (Exception e) {
-            throw new TokenException("Cannot access courier access");
+            throw new TokenException("Cannot courier access");
         }
         
 
+    }
+    private void updateCollectedParcels(List<Locker> lockers,Status status){
+        for(Locker locker : lockers){
+            locker.getCurrentParcel().setStatus(status);
+            locker.setStatus(LockerStatus.AVAILABLE);
+            parcelStatusRepository.save(ParcelStatus.builder()
+                    .parcel(locker.getCurrentParcel())
+                    .status(status)
+                    .date(new Date())
+                    .build());
+            locker.setCurrentParcel(null);
+
+        }
     }
     private boolean isExpired (Date expiredTime) {
         return expiredTime.before(new Date());
     }
     private boolean isValid(CourierParcelLockerCheckerModel courierParcelLockerChecker,int parcelLockerId){
-        return !isExpired(courierParcelLockerChecker.getExpiryDate()) && courierParcelLockerChecker.getParcelLockerId() == parcelLockerId;
+        ParcelLocker parcelLocker = parcelLockerRepository.findById(parcelLockerId).orElse(null);
+        if(parcelLocker != null){
+            return !isExpired(courierParcelLockerChecker.getExpiryDate()) && courierParcelLockerChecker.getParcelLockerId() == parcelLockerId && parcelLocker.getManager().getId() == courierParcelLockerChecker.getCourierId();
+        }
+        return false;
     }
     private String generateCourierAccessCode(CourierParcelLockerCheckerModel courierParcelLockerChecker){
         ObjectMapper mapper = new ObjectMapper();
@@ -154,11 +194,18 @@ public class CourierParcelLockerService {
 
     }
 
+    @Transactional
     public byte[] generateAllParcelLabel(int courierId,int parcelLockerId) throws JRException, IOException, WriterException {
         List<Parcel> parcels = lockerRepository.findAllParcelsByLockerStatusAndPrintedAndParcelLockerIdAndCurrentParcelStatus(LockerStatus.NOT_AVAILABLE,false,parcelLockerId, ParcelStatusConst.SENDER_LOCKER);
+        System.out.println(parcels.size());
         if(!parcels.isEmpty()){
-            parcels.forEach((parcel)-> parcel.setPrinted(true));
-            return generatePDFService.generateMultiParcelLabel( parcels);
+
+            parcels.forEach((parcel)-> {
+                parcel.setIsPrinted(true);
+                parcelRepository.save(parcel);
+
+            });
+            return generatePDFService.generateMultiParcelLabel(parcels);
         }
 
        throw new EmptyListRecordException(String.format(ExceptionMessages.EMPTY_RECORDS_LIST_EXCEPTION,"parcels"));
@@ -182,7 +229,7 @@ public class CourierParcelLockerService {
                     id(parcelLocker.getId()).
                     parcelLockerUsagePercentage(usagePercentage).
                     parcelLockerName(parcelLocker.getName()).
-                    parcelLockerAddress(parcelLocker.getAddress().getStateName() +" ("+parcelLocker.getAddress().getZipCode() +")").
+                    parcelLockerAddress(parcelLocker.getAddress().getStreet() +" ("+parcelLocker.getAddress().getZipCode() +")").
 
                     build();
             CourierParcelLocker courierParcelLocker = courierParcelLockerRepository.findFirstByParcelLockerIdOrderByCreateDateDesc(parcelLocker.getId()).orElse(null);
@@ -190,7 +237,7 @@ public class CourierParcelLockerService {
             if(courierParcelLocker != null){
                 parcelLockerStaticsResponseDto.setCourierLastTimeAccessId(courierParcelLocker.getCourier().getId());
                 parcelLockerStaticsResponseDto.setCourierLastTimeAccessName(courierParcelLocker.getCourier().getFullName());
-                parcelLockerStaticsResponseDto.setLastTimeAccess(dateTostring(courierParcelLocker.getAccessDate()));
+                parcelLockerStaticsResponseDto.setLastTimeAccess(courierParcelLocker.getAccessDate() != null ?dateTostring(courierParcelLocker.getAccessDate()) : "-" );
             }
             parcelLockerStaticsResponseDtos.add(parcelLockerStaticsResponseDto);
         }
@@ -244,4 +291,23 @@ public class CourierParcelLockerService {
             return Priority.LOW;
         }
     }
+    public List<CourierAccessResponseDto> getCourierAccessHistory(){
+        return courierParcelLockerRepository.findFirstTenRecords(PageRequest.of(0, 10));
+    }
+
+    public byte[] sendReports(){
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, -24);
+        Date cutoffDate = cal.getTime();
+        System.out.println(cutoffDate);
+        List<Courier> couriers = courierParcelLockerRepository.findCouriersNotAccessedSince(cutoffDate);
+
+        return generatePDFService.generateCourierReport();
+    }
+
+    public byte[] getCourierAccessById(int id){
+        CourierParcelLocker courierParcelLocker =courierParcelLockerRepository.findById(id).orElseThrow(()->new RecordNotFoundException("courier access id not found"));
+        return courierParcelLocker.getManifest();
+    }
+
 }

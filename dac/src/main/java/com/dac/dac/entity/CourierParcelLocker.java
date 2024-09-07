@@ -24,7 +24,7 @@ public class CourierParcelLocker {
     private Date accessDate;
     private Date expiryDate;
     private boolean isUsed=false;
-
+    private byte[] manifest;
     @ManyToOne
     @JoinColumn(name = "courier_id")
     private Courier courier;

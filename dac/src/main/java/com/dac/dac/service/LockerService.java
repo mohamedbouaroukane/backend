@@ -6,6 +6,7 @@ import com.dac.dac.entity.Locker;
 import com.dac.dac.exption.RecordNotFoundException;
 import com.dac.dac.mapper.LockerMapper;
 import com.dac.dac.payload.LockerDto;
+import com.dac.dac.payload.request.LockerRequestDto;
 import com.dac.dac.payload.response.LockerResponseDto;
 import com.dac.dac.repository.DimensionsRepository;
 import com.dac.dac.repository.LockerRepository;
@@ -37,13 +38,12 @@ public class LockerService {
         List<LockerResponseDto> lockersDto = lockers.stream().map((locker)->this.lockerMapper.mapToDto(locker)).toList();
         return lockersDto;
     }
-    public LockerResponseDto saveLocker(LockerDto lockerDto){
+    public LockerResponseDto saveLocker(LockerRequestDto lockerDto){
         Locker locker = lockerMapper.mapToEntity(lockerDto);
-//        locker.setParcelLocker(parcelLockerRepository.findById(lockerDto.getParcelLockerId())
-//              .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"parcel locker","id",lockerDto.getParcelLockerId()))));
-//     locker.setLockerSize(dimensionsRepository.findById(lockerDto.getLockerSizeID())
-//           .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"locker size","id",lockerDto.getLockerSizeID()))));
-        locker.setStatus(LockerStatus.AVAILABLE);
+        locker.setParcelLocker(parcelLockerRepository.findById(lockerDto.getParcelLockerId())
+              .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"parcel locker","id",lockerDto.getParcelLockerId()))));
+     locker.setLockerSize(dimensionsRepository.findById(lockerDto.getLockerSizeID())
+           .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"locker size","id",lockerDto.getLockerSizeID()))));
         Locker lockerSaved = lockerRepository.save(locker);
         LockerResponseDto lockersDto = lockerMapper.mapToDto(lockerSaved);
         return lockersDto;
@@ -60,11 +60,13 @@ public class LockerService {
         }
         lockerRepository.deleteById(id);
     }
-    public LockerResponseDto updateLocker(LockerDto lockerDto){
+    public LockerResponseDto updateLocker(LockerRequestDto lockerDto){
         Locker locker = lockerRepository.findById(lockerDto.getId()).orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"locker","id",lockerDto.getId())));
-        log.info(String.valueOf(locker.getParcelLocker().getId()));
         lockerMapper.updateEntity(lockerDto,locker);
-
+        locker.setParcelLocker(parcelLockerRepository.findById(lockerDto.getParcelLockerId())
+                .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"parcel locker","id",lockerDto.getParcelLockerId()))));
+        locker.setLockerSize(dimensionsRepository.findById(lockerDto.getLockerSizeID())
+                .orElseThrow(()->new RecordNotFoundException(String.format(ExceptionMessages.RECORD_NOT_FOUND_EXCEPTION,"locker size","id",lockerDto.getLockerSizeID()))));
         return lockerMapper.mapToDto(lockerRepository.save(locker));
     }
 }

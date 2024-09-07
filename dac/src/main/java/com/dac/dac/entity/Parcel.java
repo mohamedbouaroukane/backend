@@ -31,12 +31,15 @@ public class Parcel {
     private Long pickupCode;
     private Date receiverDate;
     private String parcelDescription;
-    private boolean isPrinted;
+    private boolean isPrinted = false;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
 
+    public void setIsPrinted(boolean isPrinted) {
+        this.isPrinted = isPrinted;
+    }
 
     @ManyToOne
     @JoinColumn(name = "receiver_locker_id")

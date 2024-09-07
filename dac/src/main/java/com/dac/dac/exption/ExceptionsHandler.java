@@ -73,13 +73,11 @@ public class ExceptionsHandler {
         ErrorResponse errorResponse = new ErrorResponse("Please check parameters null", Collections.singletonList("please check parameters"),null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }*/
-
     @ExceptionHandler(TokenException.class)
-    public ResponseEntity<ErrorResponse> tokenException(TokenException e){
+    public ResponseEntity<ErrorResponse> emptyList(TokenException e) {
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), Collections.singletonList(e.getMessage()),null);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
-
     @ExceptionHandler(RegisterException.class)
     public ResponseEntity<ErrorResponse> nullPointer(RegisterException e){
         ErrorResponse errorResponse = new ErrorResponse(e.getMessage(), Collections.singletonList(e.getMessage()),null);

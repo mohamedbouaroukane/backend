@@ -1,6 +1,7 @@
 package com.dac.dac.entity;
 
 import com.dac.dac.constants.ParcelLockerStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,9 +32,13 @@ public class ParcelLocker {
     @Enumerated(EnumType.STRING)
     private ParcelLockerStatus status;
 
-    @OneToMany(mappedBy="parcelLocker",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="parcelLocker",fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Locker> lockers;
 
+
+    @ManyToOne
+    @JoinColumn(name = "courier_manager")
+    private Courier manager;
 
 
 }

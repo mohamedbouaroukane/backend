@@ -2,6 +2,7 @@ package com.dac.dac.controller;
 
 
 import com.dac.dac.payload.LockerDto;
+import com.dac.dac.payload.request.LockerRequestDto;
 import com.dac.dac.payload.response.LockerResponseDto;
 import com.dac.dac.service.LockerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,11 @@ public class LockerController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<LockerResponseDto> saveLocker(@RequestBody LockerDto lockerDto){
+    public ResponseEntity<LockerResponseDto> saveLocker(@RequestBody LockerRequestDto lockerDto){
         return new ResponseEntity<>(lockerService.saveLocker(lockerDto), HttpStatus.CREATED);
     }
     @PutMapping("/")
-    public ResponseEntity<LockerResponseDto> updateLocker(@RequestBody LockerDto lockerDto){
+    public ResponseEntity<LockerResponseDto> updateLocker(@RequestBody LockerRequestDto lockerDto){
         return new ResponseEntity<>(lockerService.updateLocker(lockerDto), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")

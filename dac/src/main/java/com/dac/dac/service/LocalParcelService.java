@@ -5,19 +5,15 @@ import com.dac.dac.constants.ParcelStatusConst;
 import com.dac.dac.entity.*;
 import com.dac.dac.exption.RecordNotFoundException;
 import com.dac.dac.mapper.LocalParcelMapper;
-import com.dac.dac.mapper.ParcelMapper;
 import com.dac.dac.payload.request.ParcelRequestDto;
 import com.dac.dac.payload.response.LocalParcelResponseDto;
 import com.dac.dac.repository.*;
-import com.google.zxing.WriterException;
 import jakarta.transaction.Transactional;
-import net.sf.jasperreports.engine.JRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Date;
 
 @Service
@@ -33,12 +29,6 @@ public class LocalParcelService {
 
     @Autowired
     private ParcelDetailRepository parcelDetailRepository;
-    @Autowired
-    private ParcelLockerRepository parcelLockerRepository;
-
-
-    @Autowired
-    private ParcelMapper parcelMapper;
 
     @Autowired
     private ParcelStatusRepository parcelStatusRepository;
@@ -46,8 +36,6 @@ public class LocalParcelService {
     @Autowired
     private GenerateParcelCodeService generateParcelCodeService;
 
-    @Autowired
-    private ParcelStatusService parcelStatusService;
     @Autowired
     private GeneratePDFService generatePDFService;
 
@@ -66,7 +54,7 @@ public class LocalParcelService {
 
 
     @Transactional
-    public LocalParcelResponseDto createLocalParcel(ParcelRequestDto parcelRequestDto) throws JRException, IOException, WriterException {
+    public LocalParcelResponseDto createLocalParcel(ParcelRequestDto parcelRequestDto){
         LocalParcel parcel = localParcelMapper.mapToEntity(parcelRequestDto);
         String trackCode = generateParcelCodeService.generateTraceCode();
         String lockerCode = generateParcelCodeService.generateLockerCode();
@@ -90,7 +78,8 @@ public class LocalParcelService {
             parcelResponseDto = localParcelMapper.mapToDto(parcelSaved);
             parcelStatusRepository.save(ParcelStatus.builder().parcel(parcel).status(status).date(new Date()).build());
             if(parcelRequestDto.isWithLabel()){
-                parcelSaved.setPrinted(true);
+                parcelSaved.setIsPrinted(false);
+
                 emailService.sendParcelLabelAttachmentsEmail(client.getEmail(),client.getFullName(),generatePDFService.generateParcelLabel(parcel));
             }
             if(parcelRequestDto.isWithReservation()){

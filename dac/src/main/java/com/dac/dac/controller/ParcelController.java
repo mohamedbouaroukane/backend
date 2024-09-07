@@ -1,10 +1,12 @@
 package com.dac.dac.controller;
 
 import com.dac.dac.payload.request.ParcelRequestDto;
+import com.dac.dac.payload.request.ParcelTax;
 import com.dac.dac.payload.response.ParcelStaticsResponseDto;
 import com.dac.dac.service.InternationalParcelService;
 import com.dac.dac.service.LocalParcelService;
 import com.dac.dac.service.ParcelService;
+import com.dac.dac.service.ParcelStatusService;
 import com.google.zxing.WriterException;
 import net.sf.jasperreports.engine.JRException;
 import org.slf4j.Logger;
@@ -33,6 +35,9 @@ public class ParcelController {
 
     @Autowired
     private ParcelService parcelService;
+    @Autowired
+    private ParcelStatusService parcelStatusService;
+
     @PostMapping(value = "/", consumes = "application/json")
     public ResponseEntity saveLocalParcel(@RequestBody ParcelRequestDto parcelRequestDto) throws JRException, IOException, WriterException {
             return new ResponseEntity(localParcelService.createLocalParcel(parcelRequestDto), HttpStatus.CREATED);
@@ -51,7 +56,7 @@ public class ParcelController {
     @GetMapping("/")
     public ResponseEntity getAllParcels() {
 
-        return new ResponseEntity(parcelService.getAllParcels(),HttpStatus.OK);
+        return new ResponseEntity(parcelService.getAllParcelsList(),HttpStatus.OK);
     }
 
     @GetMapping("/{traceCode}/trace")
@@ -68,4 +73,15 @@ public class ParcelController {
     public ResponseEntity getAllParcelStatics() {
         return new ResponseEntity(parcelService.getAllParcelStatics(),HttpStatus.OK);
     }
+    @GetMapping("/status/statics")
+    public ResponseEntity getAllParcelStatusStatics() {
+        return new ResponseEntity(parcelService.getParcelStatusStatics(),HttpStatus.OK);
+    }
+
+    @PostMapping("/tax/over-weight")
+    public ResponseEntity setParcelsOverWeightTax(@RequestBody List<ParcelTax> parcelTaxes) {
+        return new ResponseEntity(parcelService.setParcelOverWeightTax(parcelTaxes),HttpStatus.OK);
+    }
+
+
 }

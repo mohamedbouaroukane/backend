@@ -54,7 +54,25 @@ public class GeneratePDFService {
     public byte[] generateParcelLabel(Parcel parcel) throws JRException, IOException, WriterException {
             return JasperExportManager.exportReportToPdf(generatePrintedLabel(parcel));
         }
+    public byte[] generateCourierReport(){
+        try{
+            JasperReport jasperReport = JasperCompileManager.compileReport(new ClassPathResource("templates/courier-reports.jrxml").getInputStream());
+            Map<String, Object> parameters = new HashMap<>();
 
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters,new JREmptyDataSource());
+
+            JRPdfExporter pdfExporter = new JRPdfExporter();
+            pdfExporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            pdfExporter.setExporterOutput(new SimpleOutputStreamExporterOutput("report.pdf"));
+
+            System.out.println("File Generated");
+            return JasperExportManager.exportReportToPdf(jasperPrint);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
     public byte[] generateStaticPDF() throws JRException, IOException, WriterException {
 
         JasperReport jasperReport = JasperCompileManager.compileReport(new ClassPathResource("templates/label.jrxml").getInputStream());
@@ -96,7 +114,7 @@ public class GeneratePDFService {
 
         JasperReport jasperReport = JasperCompileManager.compileReport(new ClassPathResource("templates/"+getLabelType(parcel)+".jrxml").getInputStream());
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("qrcode",generateBarCodeService.generateQRCode(parcel.getLockerCode()));
+        parameters.put("qrcode",generateBarCodeService.generateQRCode("RR-"+parcel.getLockerCode()));
         parameters.put("barcode",generateBarCodeService.generateBarCode128(parcel.getTrackingCode()));
         parameters.put("traceCode",parcel.getTrackingCode());
         if(parcel instanceof LocalParcel localParcel){

@@ -19,8 +19,8 @@ public interface ReservationMapper {
     public Reservation mapToEntity(ReservationRequestDto reservation);
 
     @Mapping(source = "locker.parcelLocker.name",target = "parcelLockerName")
-    @Mapping(source = "locker.parcelLocker.latitude",target = "parcelLockerLatitude")
-    @Mapping(source = "locker.parcelLocker.longitude",target = "parcelLockerLongitude")
+    @Mapping(source = "locker.parcelLocker.address.latitude",target = "parcelLockerLatitude")
+    @Mapping(source = "locker.parcelLocker.address.longitude",target = "parcelLockerLongitude")
     public ReservationResponseDto mapToDto(Reservation reservation);
 
     public List<ReservationResponseDto> mapToDto(List<Reservation> reservations);

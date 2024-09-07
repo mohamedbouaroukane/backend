@@ -18,5 +18,6 @@ public class LockerResponseDto {
     private LockerStatus status;
     private int parcelLockerId;
     private Dimensions lockerSize;
+    private String parcelLockerName;
 
 }

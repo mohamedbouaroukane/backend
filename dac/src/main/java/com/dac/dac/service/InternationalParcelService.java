@@ -8,8 +8,6 @@ import com.dac.dac.mapper.InternationalParcelMapper;
 import com.dac.dac.mapper.LocalParcelMapper;
 import com.dac.dac.mapper.ParcelMapper;
 import com.dac.dac.payload.request.ParcelRequestDto;
-import com.dac.dac.payload.response.InternationalParcelResponseDto;
-import com.dac.dac.payload.response.LocalParcelResponseDto;
 import com.dac.dac.repository.*;
 import com.google.zxing.WriterException;
 import jakarta.transaction.Transactional;
@@ -97,18 +95,18 @@ public class InternationalParcelService {
         parcel.setLockerCode(lockerCode);
         parcel.setTrackingCode(trackCode);
         parcel.setStatus(status);
-
+        //parcel.setReceiverParcelLocker(getNearestParcelLockerByZipCode(parcelRequestDto.getZipCode()).orElse(null));
 
         internationalParcelRepository.save(parcel);
-        parcelStatusRepository.save(ParcelStatus.builder().parcel(parcel).status(status).date(new Date()).build());
+       parcelStatusRepository.save(ParcelStatus.builder().parcel(parcel).status(status).date(new Date()).build());
         return parcel;
 
     }
     public Optional<ParcelLocker> getNearestParcelLockerByZipCode(int zipCode) {
         Optional<Address> address = addressRepository.findById(zipCode);
 
-        if (address.isEmpty()) {
-            return Optional.empty();
+        if (address.isPresent()) {
+            return parcelLockerRepository.findByAddressZipCode(zipCode);
         }
 
         List<ParcelLocker> allParcelLockers = parcelLockerRepository.findAll();

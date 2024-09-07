@@ -3,6 +3,7 @@ package com.dac.dac.controller;
 import com.dac.dac.payload.ClientDto;
 import com.dac.dac.payload.response.LocalParcelResponseDto;
 import com.dac.dac.service.ClientService;
+import com.dac.dac.service.ParcelManagementService;
 import com.dac.dac.service.ParcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,8 @@ public class ClientController {
     private ClientService clientService;
     @Autowired
     private ParcelService parcelService;
+    @Autowired
+    private ParcelManagementService parcelManagementService;
 
     @GetMapping("/")
     ResponseEntity<List<ClientDto>> getAllClient(){
@@ -55,5 +58,8 @@ public class ClientController {
 //        return new ResponseEntity<>(parcelService.getReceivingParcels(id),HttpStatus.OK);
 //    }
 
-
+    @PostMapping("/{id}/parcel/{parcelId}/pay")
+    void payParcelTax(@PathVariable Integer id,@PathVariable Integer parcelId){
+        parcelManagementService.payedTaxParcel(parcelId,id);
+    }
 }

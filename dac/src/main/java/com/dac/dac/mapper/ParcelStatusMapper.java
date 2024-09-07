@@ -1,5 +1,7 @@
 package com.dac.dac.mapper;
 
+import com.dac.dac.constants.ParcelStatusConst;
+import com.dac.dac.entity.LocalParcel;
 import com.dac.dac.entity.ParcelStatus;
 import com.dac.dac.payload.ParcelStatusDto;
 import org.mapstruct.*;
@@ -23,14 +25,21 @@ public interface ParcelStatusMapper {
     public List<ParcelStatusDto> mapToDto(List<ParcelStatus> parcelStatuses);
     @Named("address")
     default String maoToLocationDto(ParcelStatus parcelStatus) {
+        String sendingAddress = "";
+        if(parcelStatus.getParcel() instanceof LocalParcel localParcel) {
+            sendingAddress = localParcel.getSenderLocker().getParcelLocker().getAddress().getStreet();
+        }
         return switch (parcelStatus.getStatus().getStatusLabel()) {
-            case CREATED -> "sender address ";
+            case CREATED -> " ";
             case CTR_HUB -> "CTR Biskra Hub";
             case SENDER_COURIER -> "in the route to CTR Biskra Hub";
-            case SENDER_LOCKER -> "parcelStatus.getParcel().getSenderLocker().getParcelLocker().getAddress()";
+            case SENDER_LOCKER -> sendingAddress;
             case RECEIVER_LOCKER -> parcelStatus.getParcel().getReceiverLocker().getParcelLocker().getAddress().toString();
             case RECEIVER_COURIER -> "In the Route to Receiver Parcel Locker";
-            case DELIVERED -> parcelStatus.getParcel().getReceiverLocker().getParcelLocker().getAddress().toString();
+            case DELIVERED -> "collected by the receiver";
+            case OVER_WEIGHT -> "CTR Biskra Hub";
+            case PAYDED -> "CTR Biskra Hub";
+
             default -> "";
         };
     }
@@ -43,6 +52,8 @@ public interface ParcelStatusMapper {
             case SENDER_LOCKER -> "In the Sender Parcel Locker";
             case RECEIVER_COURIER -> "In the Route to Parcel Locker";
             case RECEIVER_LOCKER -> "In the Receiver Parcel Locker";
+            case OVER_WEIGHT -> "Over Weight Detected";
+            case PAYDED -> "Sender Payed Over Weight Tax";
             case DELIVERED -> "Delivered";
             default -> "";
         };
@@ -57,5 +68,7 @@ public interface ParcelStatusMapper {
 
         return localDateTime.format(formatter);
     }
+
+
 
 }
